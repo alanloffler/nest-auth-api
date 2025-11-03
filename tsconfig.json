@@ -19,6 +19,13 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@admin/*": ["./src/admin/*"],
+      "@auth/*": ["./src/auth/*"],
+      "@common/*": ["./src/common/*"],
+      "@roles/*": ["./src/roles/*"]
+    }
   }
 }
