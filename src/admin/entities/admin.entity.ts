@@ -1,4 +1,13 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Role } from "@/roles/entities/role.entity";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity()
 export class Admin {
@@ -26,8 +35,12 @@ export class Admin {
   @Column({ type: "varchar", length: 10, name: "phone_number", nullable: false })
   phoneNumber: string;
 
-  @Column({ type: "varchar", length: 10, nullable: false })
-  role: string;
+  @Column({ type: "uuid", name: "role_id", nullable: false })
+  roleId: string;
+
+  @ManyToOne(() => Role, { eager: true })
+  @JoinColumn({ name: "role_id" })
+  role: Role;
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
