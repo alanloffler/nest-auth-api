@@ -1,6 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUUID, Length, MinLength } from "class-validator";
-
-import { ERole } from "@common/enums/role.enum";
+import { IsEmail, IsNotEmpty, IsString, IsUUID, Length, MinLength } from "class-validator";
 
 export class CreateAdminDto {
   @Length(8, 8, { message: "El DNI debe tener 8 caracteres" })
