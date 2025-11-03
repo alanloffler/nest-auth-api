@@ -1,7 +1,8 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString, Length, MinLength } from "class-validator";
-import { ERole } from "src/common/enums/role.enum";
+import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUUID, Length, MinLength } from "class-validator";
 
-export class AdminCreateDto {
+import { ERole } from "@common/enums/role.enum";
+
+export class CreateAdminDto {
   @Length(8, 8, { message: "El DNI debe tener 8 caracteres" })
   @IsString({ message: "El DNI debe ser una cadena de texto" })
   @IsNotEmpty({ message: "El DNI es obligatorio" })
@@ -33,7 +34,7 @@ export class AdminCreateDto {
   @IsNotEmpty({ message: "El número de teléfono es obligatorio" })
   phoneNumber: string;
 
-  @IsEnum(ERole)
+  @IsUUID()
   @IsNotEmpty({ message: "El rol es obligatorio" })
-  role: ERole;
+  roleId: string;
 }
