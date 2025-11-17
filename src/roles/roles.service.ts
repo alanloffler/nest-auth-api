@@ -2,7 +2,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 
-import { ApiResponse } from "@/common/helpers/api-response.helper";
+import { ApiResponse } from "@common/helpers/api-response.helper";
 import { CreateRoleDto } from "@roles/dto/create-role.dto";
 import { Role } from "@roles/entities/role.entity";
 import { UpdateRoleDto } from "@roles/dto/update-role.dto";

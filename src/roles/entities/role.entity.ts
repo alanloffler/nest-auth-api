@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-import { Admin } from "@/admin/entities/admin.entity";
+import { Admin } from "@admin/entities/admin.entity";
 
 @Entity()
 export class Role {

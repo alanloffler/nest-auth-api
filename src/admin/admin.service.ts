@@ -3,8 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
 import { Admin } from "@admin/entities/admin.entity";
-import { ApiResponse } from "@/common/helpers/api-response.helper";
-import { CreateAdminDto } from "@/admin/dto/create-admin.dto";
+import { ApiResponse } from "@common/helpers/api-response.helper";
+import { CreateAdminDto } from "@admin/dto/create-admin.dto";
 import { UpdateAdminDto } from "@admin/dto/update-admin.dto";
 
 @Injectable()
