@@ -36,6 +36,8 @@ export class AuthService {
   async validateUser(email: string): Promise<IPayload> {
     const user = await this.adminService.findOneByEmail(email);
 
+    if (!user) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
+
     return {
       id: user.id,
       email: user.email,
@@ -43,18 +45,13 @@ export class AuthService {
     };
   }
 
-  async validatePassword(email: string, password: string): Promise<IPayload> {
+  async validatePassword(email: string, password: string): Promise<boolean> {
     const user = await this.adminService.findOneByEmail(email);
 
-    if (!user || !user.password || user.password !== password) {
-      throw new HttpException("Contraseña incorrecta", HttpStatus.UNAUTHORIZED);
-    }
+    if (!user) throw new HttpException("Usuario incorrecto", HttpStatus.BAD_REQUEST);
+    if (user.password !== password) throw new HttpException("Contraseña incorrecta", HttpStatus.UNAUTHORIZED);
 
-    return {
-      id: user.id,
-      email: user.email,
-      role: user.role.value,
-    };
+    return true;
   }
 
   async getTokens(payload: IPayload): Promise<IToken> {

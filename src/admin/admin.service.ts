@@ -55,7 +55,6 @@ export class AdminService {
 
   public async findOneByEmail(email: string) {
     const admin = await this.adminRepository.findOne({ where: { email } });
-    if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
 
     return admin;
   }
