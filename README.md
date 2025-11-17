@@ -55,6 +55,8 @@ Suggested values:
 JWT_EXPIRES_IN=15m  
 JWT_REFRESH_EXPIRES_IN=5d
 
+Role permission: use JwtAuthGuard and RolesGuard to access the endpoints (implemented in admin and roles controllers).
+
 ## Stay in touch
 
 - Author - [Alan Löffler](https://github.com/alanloffler)
