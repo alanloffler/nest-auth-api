@@ -4,12 +4,8 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 
+import type { IPayload } from "@auth/interfaces/payload.interface";
 import { AdminService } from "@admin/admin.service";
-
-export interface IJwtPayload {
-  sub: string;
-  email: string;
-}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -32,8 +28,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: IJwtPayload) {
-    const admin = await this.adminService.findOne(payload.sub);
+  async validate(payload: IPayload) {
+    const admin = await this.adminService.findOne(payload.id);
     if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.UNAUTHORIZED);
 
     return {
