@@ -109,6 +109,13 @@ export class AuthService {
     return ApiResponse.success<IToken>("Actualización de token exitoso", tokens);
   }
 
+  async getAdmin(payload: IPayload) {
+    const admin = await this.adminService.getAdmin(payload.id);
+    if (!admin) throw new HttpException("Administrador no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success("Administrador encontrado", admin);
+  }
+
   private setTokenCookie(res: Response, tokens: IToken): void {
     res.cookie("accessToken", tokens.accessToken, {
       httpOnly: true,
