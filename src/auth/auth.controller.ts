@@ -31,4 +31,11 @@ export class AuthController {
 
     return this.authService.refreshToken(req.user, refreshToken, res);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("admin")
+  getAdmin(@Req() req: IRequest) {
+    console.log(req.user);
+    return this.authService.getAdmin(req.user);
+  }
 }
