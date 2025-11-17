@@ -36,7 +36,7 @@ export class AuthService {
   async validateUser(email: string): Promise<IPayload> {
     const user = await this.adminService.findOneByEmail(email);
 
-    if (!user) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException("Usuario incorrecto", HttpStatus.NOT_FOUND);
 
     return {
       id: user.id,
