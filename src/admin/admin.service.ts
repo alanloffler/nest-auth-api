@@ -60,6 +60,15 @@ export class AdminService {
     return admin;
   }
 
+  public async getAdmin(id: string): Promise<Admin | null> {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      select: ["id", "ic", "email", "userName", "firstName", "lastName", "role"],
+    });
+
+    return admin;
+  }
+
   private async findOneById(id: string): Promise<Admin> {
     const admin = await this.adminRepository.findOne({ where: { id } });
     if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
