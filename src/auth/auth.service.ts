@@ -145,7 +145,7 @@ export class AuthService {
       secure: true,
       sameSite: "none",
       maxAge: 0,
-      path: "/auth/refresh",
+      path: "/",
     });
   }
 
