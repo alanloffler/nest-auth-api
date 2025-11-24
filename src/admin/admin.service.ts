@@ -21,14 +21,63 @@ export class AdminService {
   }
 
   async findAll(): Promise<ApiResponse<Admin[]>> {
-    const admins = await this.adminRepository.find();
+    const admins = await this.adminRepository.find({
+      select: [
+        "id",
+        "ic",
+        "userName",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "role",
+        "createdAt",
+        "updatedAt",
+      ],
+    });
     if (!admins) throw new HttpException("Admins no encontrados", HttpStatus.NOT_FOUND);
 
     return ApiResponse.success<Admin[]>("Admins encontrados", admins);
   }
 
   async findOne(id: string): Promise<ApiResponse<Admin>> {
-    const admin = await this.adminRepository.findOne({ where: { id } });
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      select: [
+        "id",
+        "ic",
+        "userName",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "role",
+        "createdAt",
+        "updatedAt",
+      ],
+    });
+    if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Admin>("Admin encontrado", admin);
+  }
+
+  async findOneWithToken(id: string): Promise<ApiResponse<Admin>> {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      select: [
+        "id",
+        "ic",
+        "userName",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "role",
+        "createdAt",
+        "updatedAt",
+        "refreshToken",
+      ],
+    });
     if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
 
     return ApiResponse.success<Admin>("Admin encontrado", admin);
