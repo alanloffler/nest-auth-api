@@ -35,7 +35,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get("admin")
   getAdmin(@Req() req: IRequest) {
-    console.log(req.user);
     return this.authService.getAdmin(req.user);
   }
 }
