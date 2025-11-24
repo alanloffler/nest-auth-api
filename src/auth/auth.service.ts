@@ -24,7 +24,7 @@ export class AuthService {
       role: req.user.role,
     };
 
-    const tokens = await this.getTokens(payload);
+    const tokens = await this.getTokens(payload, true);
 
     await this.updateRefreshToken(payload.id, tokens.refreshToken);
 
@@ -54,22 +54,25 @@ export class AuthService {
     return true;
   }
 
-  async getTokens(payload: IPayload): Promise<IToken> {
+  async getTokens(payload: IPayload, includeRefresh: boolean = true): Promise<IToken> {
     const sanitizedPayload: IPayload = { ...payload };
     delete sanitizedPayload.exp;
     delete sanitizedPayload.iat;
 
     try {
-      const [accessToken, refreshToken] = await Promise.all([
-        this.jwtService.signAsync(sanitizedPayload, {
-          secret: this.configService.get<string>("JWT_SECRET"),
-          expiresIn: this.configService.get("JWT_EXPIRES_IN"),
-        }),
-        this.jwtService.signAsync(sanitizedPayload, {
+      const accessToken = await this.jwtService.signAsync(sanitizedPayload, {
+        secret: this.configService.get<string>("JWT_SECRET"),
+        expiresIn: this.configService.get("JWT_EXPIRES_IN"),
+      });
+
+      let refreshToken: string | undefined;
+
+      if (includeRefresh) {
+        refreshToken = await this.jwtService.signAsync(sanitizedPayload, {
           secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
           expiresIn: this.configService.get("JWT_REFRESH_EXPIRES_IN"),
-        }),
-      ]);
+        });
+      }
 
       return { accessToken, refreshToken };
     } catch (error) {
@@ -77,7 +80,7 @@ export class AuthService {
     }
   }
 
-  async updateRefreshToken(id: string, refreshToken: string): Promise<void> {
+  async updateRefreshToken(id: string, refreshToken?: string): Promise<void> {
     const updateToken = await this.adminService.update(id, { refreshToken });
     if (!updateToken) throw new HttpException("Error al actualizar token", HttpStatus.BAD_REQUEST);
 
@@ -92,18 +95,30 @@ export class AuthService {
   }
 
   async refreshToken(payload: IPayload, refreshToken: string, res: Response) {
-    const admin = await this.adminService.findOne(payload.id);
-    if (!admin.data || !admin.data?.refreshToken)
-      throw new HttpException("Token de actualización no existe", HttpStatus.BAD_REQUEST);
-    if (admin.data?.refreshToken !== refreshToken)
-      throw new HttpException("Token de actualización inválido", HttpStatus.BAD_REQUEST);
+    const admin = await this.adminService.findOneWithToken(payload.id);
 
-    const tokens = await this.getTokens(payload);
-    await this.updateRefreshToken(admin.data.id, tokens.refreshToken);
+    if (!admin.data?.refreshToken) throw new HttpException("Token de actualización no existe", HttpStatus.BAD_REQUEST);
 
-    this.setTokenCookie(res, tokens);
+    if (admin.data.refreshToken !== refreshToken)
+      throw new HttpException("Token de actualización inválido", HttpStatus.UNAUTHORIZED);
 
-    return ApiResponse.success<IToken>("Actualización de token exitoso", tokens);
+    const shouldRotate = false;
+
+    const tokens = await this.getTokens(payload, shouldRotate);
+
+    if (shouldRotate) {
+      await this.updateRefreshToken(admin.data.id, tokens.refreshToken);
+    }
+
+    this.setTokenCookie(res, {
+      accessToken: tokens.accessToken,
+      refreshToken: shouldRotate ? tokens.refreshToken : refreshToken,
+    });
+
+    return ApiResponse.success("Actualización de token exitosa", {
+      accessToken: tokens.accessToken,
+      refreshToken: shouldRotate ? tokens.refreshToken : refreshToken,
+    });
   }
 
   async getAdmin(payload: IPayload) {
