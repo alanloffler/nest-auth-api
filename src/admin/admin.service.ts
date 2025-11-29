@@ -31,6 +31,7 @@ export class AdminService {
         "email",
         "phoneNumber",
         "role",
+        "roleId",
         "createdAt",
         "updatedAt",
       ],
@@ -52,10 +53,21 @@ export class AdminService {
         "email",
         "phoneNumber",
         "role",
+        "roleId",
         "createdAt",
         "updatedAt",
       ],
     });
+    if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Admin>("Admin encontrado", admin);
+  }
+
+  async findOneWithCredentials(id: string): Promise<ApiResponse<Admin>> {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+    });
+    console.log(admin);
     if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
 
     return ApiResponse.success<Admin>("Admin encontrado", admin);
@@ -73,6 +85,7 @@ export class AdminService {
         "email",
         "phoneNumber",
         "role",
+        "roleId",
         "createdAt",
         "updatedAt",
         "refreshToken",
@@ -84,13 +97,13 @@ export class AdminService {
   }
 
   async update(id: string, updateAdminDto: UpdateAdminDto): Promise<ApiResponse<Admin>> {
-    const adminToUpdate = await this.findOneById(id);
-
-    const merged = this.adminRepository.merge(adminToUpdate, updateAdminDto);
-    const result = await this.adminRepository.save(merged);
+    const result = await this.adminRepository.update(id, updateAdminDto);
     if (!result) throw new HttpException("Error al actualizar admin", HttpStatus.BAD_REQUEST);
 
-    return ApiResponse.success<Admin>("Admin actualizado", result);
+    const updatedAdmin = await this.findOneById(id);
+    if (!updatedAdmin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Admin>("Admin actualizado", updatedAdmin);
   }
 
   async remove(id: string): Promise<ApiResponse<Admin>> {
