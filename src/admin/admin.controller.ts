@@ -24,13 +24,19 @@ export class AdminController {
     return this.adminService.findAll();
   }
 
-  @Roles([ERole.Teacher])
+  @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
   @Get(":id")
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.findOne(id);
   }
 
-  @Roles([ERole.Teacher])
+  @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
+  @Get(":id/credentials")
+  findOneWithCredentials(@Param("id", ParseUUIDPipe) id: string) {
+    return this.adminService.findOneWithCredentials(id);
+  }
+
+  @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
   @Patch(":id")
   update(@Param("id", ParseUUIDPipe) id: string, @Body() admin: UpdateAdminDto) {
     return this.adminService.update(id, admin);
