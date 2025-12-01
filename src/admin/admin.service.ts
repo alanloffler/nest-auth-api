@@ -12,7 +12,9 @@ export class AdminService {
   constructor(@InjectRepository(Admin) private adminRepository: Repository<Admin>) {}
 
   async create(createAdminDto: CreateAdminDto): Promise<ApiResponse<Admin>> {
-    // TODO: check if admin already exists
+    const checkIc = await this.checkIcAvailability(createAdminDto.ic);
+    if (checkIc.data === false) throw new HttpException("DNI ya registrado", HttpStatus.BAD_REQUEST);
+
     const createAdmin = this.adminRepository.create(createAdminDto);
     const saveAdmin = await this.adminRepository.save(createAdmin);
     if (!saveAdmin) throw new HttpException("Error al crear admin", HttpStatus.BAD_REQUEST);
@@ -128,6 +130,11 @@ export class AdminService {
     });
 
     return admin;
+  }
+
+  public async checkIcAvailability(ic: string): Promise<ApiResponse<boolean>> {
+    const admin = await this.adminRepository.findOne({ where: { ic: ic } });
+    return ApiResponse.success<boolean>("Disponibilidad de DNI", admin ? false : true);
   }
 
   private async findOneById(id: string): Promise<Admin> {
