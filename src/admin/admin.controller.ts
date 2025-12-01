@@ -9,16 +9,17 @@ import { RolesGuard } from "@auth/guards/roles.guard";
 import { UpdateAdminDto } from "@admin/dto/update-admin.dto";
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles([ERole.Superadmin, ERole.Admin])
 @Controller("admin")
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @Roles([ERole.Superadmin, ERole.Admin])
   @Post()
   create(@Body() admin: CreateAdminDto) {
     return this.adminService.create(admin);
   }
 
+  @Roles([ERole.Superadmin, ERole.Admin])
   @Get()
   findAll() {
     return this.adminService.findAll();
@@ -42,8 +43,15 @@ export class AdminController {
     return this.adminService.update(id, admin);
   }
 
+  @Roles([ERole.Superadmin, ERole.Admin])
   @Delete(":id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.remove(id);
+  }
+
+  @Roles([ERole.Superadmin, ERole.Admin])
+  @Get("/ic-availability/:ic")
+  checkIcAvailability(@Param("ic") id: string) {
+    return this.adminService.checkIcAvailability(id);
   }
 }
