@@ -25,6 +25,7 @@
       "@admin/*": ["./src/admin/*"],
       "@auth/*": ["./src/auth/*"],
       "@common/*": ["./src/common/*"],
+      "@config/*": ["./src/config/*"],
       "@roles/*": ["./src/roles/*"]
     }
   }
