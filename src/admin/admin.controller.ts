@@ -25,6 +25,12 @@ export class AdminController {
     return this.adminService.findAll();
   }
 
+  @Roles([ERole.Superadmin])
+  @Get("softRemoved")
+  findAllSoftRemoved() {
+    return this.adminService.findAllSoftRemoved();
+  }
+
   @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
   @Get(":id")
   findOne(@Param("id", ParseUUIDPipe) id: string) {
@@ -44,9 +50,21 @@ export class AdminController {
   }
 
   @Roles([ERole.Superadmin, ERole.Admin])
+  @Delete("soft-remove/:id")
+  softRemove(@Param("id", ParseUUIDPipe) id: string) {
+    return this.adminService.softRemove(id);
+  }
+
+  @Roles([ERole.Superadmin])
   @Delete(":id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.remove(id);
+  }
+
+  @Roles([ERole.Superadmin])
+  @Patch("restore/:id")
+  restore(@Param("id", ParseUUIDPipe) id: string) {
+    return this.adminService.restore(id);
   }
 
   @Roles([ERole.Superadmin, ERole.Admin])
