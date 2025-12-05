@@ -43,6 +43,29 @@ export class AdminService {
     return ApiResponse.success<Admin[]>("Admins encontrados", admins);
   }
 
+  async findAllSoftRemoved(): Promise<ApiResponse<Admin[]>> {
+    const admins = await this.adminRepository.find({
+      select: [
+        "id",
+        "ic",
+        "userName",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "role",
+        "roleId",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+      ],
+      withDeleted: true,
+    });
+    if (!admins) throw new HttpException("Admins no encontrados", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Admin[]>("Admins encontrados", admins);
+  }
+
   async findOne(id: string): Promise<ApiResponse<Admin>> {
     const admin = await this.adminRepository.findOne({
       where: { id },
@@ -108,6 +131,15 @@ export class AdminService {
     return ApiResponse.success<Admin>("Admin actualizado", updatedAdmin);
   }
 
+  async softRemove(id: string): Promise<ApiResponse<Admin>> {
+    const adminToRemove = await this.findOneById(id);
+
+    const result = await this.adminRepository.softRemove(adminToRemove);
+    if (!result) throw new HttpException("Error al eliminar admin", HttpStatus.BAD_REQUEST);
+
+    return ApiResponse.removed<Admin>("Admin eliminado", result);
+  }
+
   async remove(id: string): Promise<ApiResponse<Admin>> {
     const adminToRemove = await this.findOneById(id);
 
@@ -115,6 +147,22 @@ export class AdminService {
     if (!result) throw new HttpException("Error al eliminar admin", HttpStatus.BAD_REQUEST);
 
     return ApiResponse.removed<Admin>("Admin eliminado", result);
+  }
+
+  async restore(id: string): Promise<ApiResponse<Admin>> {
+    const adminToRestore = await this.adminRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!adminToRestore) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
+
+    const result = await this.adminRepository.restore(adminToRestore.id);
+    if (!result) throw new HttpException("Error al restaurar admin", HttpStatus.BAD_REQUEST);
+
+    const restoredAdmin = await this.findOneById(id);
+
+    return ApiResponse.success<Admin>("Admin restaurado", restoredAdmin);
   }
 
   public async findOneByEmail(email: string) {
