@@ -1,4 +1,12 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 import { Admin } from "@admin/entities/admin.entity";
 
@@ -24,4 +32,7 @@ export class Role {
 
   @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
+
+  @DeleteDateColumn({ name: "deleted_at" })
+  deletedAt?: Date;
 }
