@@ -88,11 +88,34 @@ export class AdminService {
     return ApiResponse.success<Admin>("Admin encontrado", admin);
   }
 
+  async findOneSoftRemoved(id: string): Promise<ApiResponse<Admin>> {
+    const admin = await this.adminRepository.findOne({
+      where: { id },
+      select: [
+        "id",
+        "ic",
+        "userName",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "role",
+        "roleId",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+      ],
+      withDeleted: true,
+    });
+    if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Admin>("Admin encontrado", admin);
+  }
+
   async findOneWithCredentials(id: string): Promise<ApiResponse<Admin>> {
     const admin = await this.adminRepository.findOne({
       where: { id },
     });
-    console.log(admin);
     if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
 
     return ApiResponse.success<Admin>("Admin encontrado", admin);
