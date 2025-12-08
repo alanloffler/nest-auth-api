@@ -4,6 +4,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { AdminModule } from "@admin/admin.module";
 import { AuthModule } from "@auth/auth.module";
+import { PermissionsModule } from "@permissions/permissions.module";
 import { RolesModule } from "@roles/roles.module";
 import { typeOrmConfig } from "@config/typeorm.config";
 
@@ -19,6 +20,7 @@ import { typeOrmConfig } from "@config/typeorm.config";
     }),
     AdminModule,
     AuthModule,
+    PermissionsModule,
     RolesModule,
   ],
   controllers: [],
