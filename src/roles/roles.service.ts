@@ -30,6 +30,13 @@ export class RolesService {
     return ApiResponse.success<Role[]>("Roles encontrados", roles);
   }
 
+  async findAllSoftRemoved(): Promise<ApiResponse<Role[]>> {
+    const roles = await this.roleRepository.find({ withDeleted: true });
+    if (!roles) throw new HttpException("Roles no encontrados", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Role[]>("Roles encontrados", roles);
+  }
+
   async findOne(id: string): Promise<ApiResponse<Role>> {
     const role = await this.roleRepository.findOne({ where: { id } });
     if (!role) throw new HttpException("Rol no encontrado", HttpStatus.NOT_FOUND);
@@ -58,6 +65,31 @@ export class RolesService {
     if (!result) throw new HttpException("Error al eliminar rol", HttpStatus.BAD_REQUEST);
 
     return ApiResponse.success<Role>("Rol eliminado", result);
+  }
+
+  async softRemove(id: string): Promise<ApiResponse<Role>> {
+    const roleToRemove = await this.findRoleById(id);
+
+    const result = await this.roleRepository.softRemove(roleToRemove);
+    if (!result) throw new HttpException("Error al eliminar rol", HttpStatus.BAD_REQUEST);
+
+    return ApiResponse.removed<Role>("Rol eliminado", result);
+  }
+
+  async restore(id: string): Promise<ApiResponse<Role>> {
+    const roleToRestore = await this.roleRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+
+    if (!roleToRestore) throw new HttpException("Rol no encontrado", HttpStatus.NOT_FOUND);
+
+    const result = await this.roleRepository.restore(roleToRestore.id);
+    if (!result) throw new HttpException("Error al restaurar rol", HttpStatus.BAD_REQUEST);
+
+    const restoredAdmin = await this.findRoleById(id);
+
+    return ApiResponse.success<Role>("Rol restaurado", restoredAdmin);
   }
 
   // Private methods
