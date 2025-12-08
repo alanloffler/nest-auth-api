@@ -24,6 +24,11 @@ export class RolesController {
     return this.rolesService.findAll();
   }
 
+  @Get("soft-removed")
+  findAllSoftRemoved() {
+    return this.rolesService.findAllSoftRemoved();
+  }
+
   @Get(":id")
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.rolesService.findOne(id);
@@ -37,5 +42,17 @@ export class RolesController {
   @Delete(":id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.rolesService.remove(id);
+  }
+
+  @Roles([ERole.Superadmin, ERole.Admin])
+  @Delete("soft-remove/:id")
+  softRemove(@Param("id", ParseUUIDPipe) id: string) {
+    return this.rolesService.softRemove(id);
+  }
+
+  @Roles([ERole.Superadmin])
+  @Patch("restore/:id")
+  restore(@Param("id", ParseUUIDPipe) id: string) {
+    return this.rolesService.restore(id);
   }
 }
