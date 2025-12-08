@@ -1,26 +1,78 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 
 import { ApiResponse } from "@common/helpers/api-response.helper";
 import { CreateRoleDto } from "@roles/dto/create-role.dto";
+import { Permission } from "@permissions/entities/permission.entity";
 import { Role } from "@roles/entities/role.entity";
+import { RolePermission } from "@roles/entities/role-permission.entity";
 import { UpdateRoleDto } from "@roles/dto/update-role.dto";
 
 @Injectable()
 export class RolesService {
-  constructor(@InjectRepository(Role) private readonly roleRepository: Repository<Role>) {}
+  constructor(
+    @InjectRepository(Permission) private readonly permRepository: Repository<Permission>,
+    @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+    @InjectRepository(RolePermission) private readonly rolePermRepository: Repository<RolePermission>,
+    private readonly dataSource: DataSource,
+  ) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<ApiResponse<Role>> {
-    const repeatedRole = await this.roleAlreadyExists(createRoleDto.value);
-    if (repeatedRole) throw new HttpException("El rol ya existe", HttpStatus.BAD_REQUEST);
+    const role = this.roleRepository.create({
+      name: createRoleDto.name,
+      value: createRoleDto.value,
+      description: createRoleDto.description,
+    });
 
-    const role = this.roleRepository.create(createRoleDto);
-    const saveRole = await this.roleRepository.save(role);
+    const enabledPermissionIds = createRoleDto.permissions.flatMap((group) =>
+      group.actions.filter((a) => a.value).map((a) => a.id),
+    );
 
-    if (!saveRole) throw new HttpException("Error al crear rol", HttpStatus.BAD_REQUEST);
+    const uniqPermissionIds = Array.from(new Set(enabledPermissionIds));
 
-    return ApiResponse.created<Role>("Rol creado", saveRole);
+    if (uniqPermissionIds.length === 0) {
+      const savedRole = await this.roleRepository.save(role);
+      const result = await this.roleRepository.findOne({
+        where: { id: savedRole.id },
+        relations: ["rolePermissions", "rolePermissions.permission"],
+      });
+
+      return ApiResponse.created<Role>("Rol creado", result || undefined);
+    }
+
+    const permissions = await this.permRepository.find({
+      where: { id: In(uniqPermissionIds) },
+    });
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const savedRole = await queryRunner.manager.save(Role, role);
+      const rolePermsToInsert = permissions.map((perm) => {
+        return this.rolePermRepository.create({
+          roleId: savedRole.id,
+          permissionId: perm.id,
+        });
+      });
+
+      await queryRunner.manager.save(RolePermission, rolePermsToInsert);
+      await queryRunner.commitTransaction();
+
+      const result = await this.roleRepository.findOne({
+        where: { id: savedRole.id },
+        relations: ["rolePermissions", "rolePermissions.permission"],
+      });
+
+      return ApiResponse.created<Role>("Rol creado", result || undefined);
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async findAll(): Promise<ApiResponse<Role[]>> {
