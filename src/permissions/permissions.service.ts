@@ -1,10 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { CreatePermissionDto } from "./dto/create-permission.dto";
-import { UpdatePermissionDto } from "./dto/update-permission.dto";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Permission } from "./entities/permission.entity";
 import { Repository } from "typeorm";
-import { ApiResponse } from "@/common/helpers/api-response.helper";
+
+import { ApiResponse } from "@common/helpers/api-response.helper";
+import { CreatePermissionDto } from "@permissions/dto/create-permission.dto";
+import { Permission } from "@permissions/entities/permission.entity";
+import { UpdatePermissionDto } from "@permissions/dto/update-permission.dto";
 
 export interface GroupedPermission {
   id: string;
@@ -50,8 +51,8 @@ export class PermissionsService {
 
   async findAllGrouped(): Promise<ApiResponse<GroupedPermission[]>> {
     const permissions = await this.permissionRepository.find();
+    if (!permissions) throw new HttpException("Permisos no encontrados", HttpStatus.NOT_FOUND);
 
-    // Agrupar por category
     const grouped = permissions.reduce(
       (acc, permission) => {
         if (!acc[permission.category]) {
@@ -63,9 +64,8 @@ export class PermissionsService {
       {} as Record<string, typeof permissions>,
     );
 
-    // Transformar a la estructura deseada
     const data = Object.entries(grouped).map(([category, perms]) => ({
-      id: perms[0].id, // Usar el ID del primer permiso, o genera uno nuevo si prefieres
+      id: crypto.randomUUID(),
       name: this.getCategoryName(category),
       module: category,
       actions: perms.map((p) => ({
@@ -79,12 +79,10 @@ export class PermissionsService {
     return ApiResponse.success<GroupedPermission[]>("Permisos encontrados", data);
   }
 
-  // Método auxiliar para convertir category a nombre legible
   private getCategoryName(category: string): string {
     const categoryNames: Record<string, string> = {
       admin: "Administradores",
       roles: "Roles",
-      // Agrega más categorías según necesites
     };
 
     return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
