@@ -1,34 +1,48 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { PermissionsService } from './permissions.service';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common";
 
-@Controller('permissions')
+import { CreatePermissionDto } from "@permissions/dto/create-permission.dto";
+import { ERole } from "@common/enums/role.enum";
+import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
+import { PermissionsService } from "@permissions/permissions.service";
+import { Roles } from "@auth/decorators/roles.decorator";
+import { RolesGuard } from "@auth/guards/roles.guard";
+import { UpdatePermissionDto } from "@permissions/dto/update-permission.dto";
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller("permissions")
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
+  @Roles([ERole.Superadmin])
   @Post()
   create(@Body() createPermissionDto: CreatePermissionDto) {
     return this.permissionsService.create(createPermissionDto);
   }
 
+  @Roles([ERole.Superadmin, ERole.Admin])
   @Get()
   findAll() {
     return this.permissionsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Roles([ERole.Superadmin, ERole.Admin])
+  @Get("grouped")
+  findAllGrouped() {
+    return this.permissionsService.findAllGrouped();
+  }
+
+  @Get(":id")
+  findOne(@Param("id") id: string) {
     return this.permissionsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
     return this.permissionsService.update(+id, updatePermissionDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(":id")
+  remove(@Param("id") id: string) {
     return this.permissionsService.remove(+id);
   }
 }
