@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MinLength } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsNotEmpty, IsString, MinLength } from "class-validator";
 
 export class CreateRoleDto {
   @MinLength(3, { message: "El nombre del rol debe tener al menos 3 caracteres" })
@@ -15,4 +15,15 @@ export class CreateRoleDto {
   @IsString({ message: "La descripción del rol debe ser una cadena de texto" })
   @IsNotEmpty({ message: "La descripción del rol es obligatoria" })
   description: string;
+
+  @ArrayNotEmpty({ message: "Debes proporcionar al menos un permiso" })
+  @IsArray({ message: "Los permisos del rol deben ser un array" })
+  permissions: {
+    id: string;
+    actions: {
+      id: string;
+      key: string;
+      value: boolean;
+    }[];
+  }[];
 }
