@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 
 import { Admin } from "@admin/entities/admin.entity";
+import { RolePermission } from "@roles/entities/role-permission.entity";
 
 @Entity()
 export class Role {
@@ -26,6 +27,9 @@ export class Role {
 
   @OneToMany(() => Admin, (admin) => admin.role)
   admins: Admin[];
+
+  @OneToMany(() => RolePermission, (rp) => rp.role, { cascade: true, eager: true })
+  rolePermissions: RolePermission[];
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
