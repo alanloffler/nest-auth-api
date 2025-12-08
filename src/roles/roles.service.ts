@@ -19,6 +19,8 @@ export class RolesService {
   ) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<ApiResponse<Role>> {
+    await this.roleExists(createRoleDto.value);
+
     const role = this.roleRepository.create({
       name: createRoleDto.name,
       value: createRoleDto.value,
@@ -145,6 +147,11 @@ export class RolesService {
   }
 
   // Private methods
+  private async roleExists(value: string): Promise<void> {
+    const role = await this.roleRepository.findOne({ where: { value } });
+    if (role) throw new HttpException("El rol ya existe. No puedes repetirlo", HttpStatus.BAD_REQUEST);
+  }
+
   private async roleAlreadyExists(value: string): Promise<boolean> {
     const role = await this.roleRepository.findOne({ where: { value } });
     return role ? true : false;
