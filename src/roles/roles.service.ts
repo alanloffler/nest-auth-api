@@ -124,6 +124,17 @@ export class RolesService {
   }
 
   async remove(id: string): Promise<ApiResponse<Role>> {
+    const adminsWithRole = await this.roleRepository.findOne({
+      where: { id },
+      relations: ["admins"],
+    });
+    if (adminsWithRole && adminsWithRole.admins.length > 0) {
+      throw new HttpException(
+        `${adminsWithRole.admins.length} ${adminsWithRole.admins.length > 1 ? "usuarios tienen" : "usuario tiene"} este rol. No puedes eliminar un rol con usuarios`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const roleToRemove = await this.findRoleById(id);
 
     const result = await this.roleRepository.remove(roleToRemove);
