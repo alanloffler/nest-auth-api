@@ -96,7 +96,13 @@ export class PermissionsService {
     return `This action updates a #${id} permission`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} permission`;
+  async remove(id: string): Promise<ApiResponse<Permission>> {
+    const permissionToRemove = await this.permissionRepository.findOneBy({ id });
+    if (!permissionToRemove) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
+
+    const result = await this.permissionRepository.remove(permissionToRemove);
+    if (!result) throw new HttpException("Error al eliminar permiso", HttpStatus.BAD_REQUEST);
+
+    return ApiResponse.removed<Permission>("Permiso eliminado", result);
   }
 }
