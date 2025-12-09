@@ -112,15 +112,60 @@ export class RolesService {
   async update(id: string, updateRoleDto: UpdateRoleDto): Promise<ApiResponse<Role>> {
     const roleToUpdate = await this.findRoleById(id);
 
-    const { value } = updateRoleDto;
+    const { value, permissions } = updateRoleDto;
     if (value && value !== roleToUpdate.value && (await this.roleAlreadyExists(value))) {
       throw new HttpException("El rol ya existe. No puedes repetirlo", HttpStatus.BAD_REQUEST);
     }
 
-    const result = await this.roleRepository.save({ ...roleToUpdate, ...updateRoleDto });
-    if (!result) throw new HttpException("Error al actualizar rol", HttpStatus.BAD_REQUEST);
+    const enabledPermissionIds = permissions
+      ? permissions.flatMap((group) => group.actions.filter((a) => a.value).map((a) => a.id))
+      : [];
 
-    return ApiResponse.success<Role>("Rol actualizado", result);
+    const uniquePermissionIds = Array.from(new Set(enabledPermissionIds));
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const updateRole = await queryRunner.manager.save(Role, {
+        ...roleToUpdate,
+        name: updateRoleDto.name,
+        value: updateRoleDto.value,
+        description: updateRoleDto.description,
+      });
+
+      await queryRunner.manager.delete(RolePermission, { roleId: id });
+
+      if (uniquePermissionIds.length > 0) {
+        const permissions = await this.permRepository.find({
+          where: { id: In(uniquePermissionIds) },
+        });
+
+        const rolePermsToInsert = permissions.map((perm) => {
+          return this.rolePermRepository.create({
+            roleId: updateRole.id,
+            permissionId: perm.id,
+          });
+        });
+
+        await queryRunner.manager.save(RolePermission, rolePermsToInsert);
+      }
+
+      await queryRunner.commitTransaction();
+
+      const result = await this.roleRepository.findOne({
+        where: { id: updateRole.id },
+        relations: ["rolePermissions", "rolePermissions.permission"],
+      });
+
+      return ApiResponse.success<Role>("Rol actualizado", result || undefined);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async remove(id: string): Promise<ApiResponse<Role>> {
