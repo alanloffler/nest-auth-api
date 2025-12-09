@@ -34,6 +34,7 @@ export class RolesController {
     return this.rolesService.findOne(id);
   }
 
+  @Roles([ERole.Superadmin, ERole.Admin])
   @Patch(":id")
   update(@Param("id", ParseUUIDPipe) id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(id, updateRoleDto);
