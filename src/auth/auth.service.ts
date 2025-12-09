@@ -37,6 +37,7 @@ export class AuthService {
     const user = await this.adminService.findOneByEmail(email);
 
     if (!user) throw new HttpException("Usuario incorrecto", HttpStatus.NOT_FOUND);
+    if (!user.role) throw new HttpException("El usuario posee un rol inactivo", HttpStatus.NOT_FOUND);
 
     return {
       id: user.id,
