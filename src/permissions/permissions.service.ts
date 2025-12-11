@@ -88,12 +88,27 @@ export class PermissionsService {
     return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} permission`;
+  async findOne(id: string): Promise<ApiResponse<Permission>> {
+    const permission = await this.permissionRepository.findOneBy({ id });
+    if (!permission) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Permission>("Permiso encontrado", permission);
   }
 
-  update(id: number, updatePermissionDto: UpdatePermissionDto) {
-    return `This action updates a #${id} permission`;
+  async update(id: string, updatePermissionDto: UpdatePermissionDto): Promise<ApiResponse<Permission>> {
+    const permissionDto = {
+      ...updatePermissionDto,
+      actionKey: `${updatePermissionDto.category}-${updatePermissionDto.actionKey}`,
+    };
+
+    const result = await this.permissionRepository.update(id, permissionDto);
+
+    if (!result) throw new HttpException("Error al actualizar permiso", HttpStatus.BAD_REQUEST);
+
+    const updatedPermission = await this.permissionRepository.findOneBy({ id });
+    if (!updatedPermission) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Permission>("Permiso actualizado", updatedPermission);
   }
 
   async remove(id: string): Promise<ApiResponse<Permission>> {
