@@ -22,6 +22,7 @@ export class AuthService {
       id: req.user.id,
       email: req.user.email,
       role: req.user.role,
+      roleId: req.user.roleId,
     };
 
     const tokens = await this.getTokens(payload, true);
@@ -43,6 +44,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       role: user.role.value,
+      roleId: user.role.id,
     };
   }
 
