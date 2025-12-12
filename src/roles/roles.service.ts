@@ -5,6 +5,7 @@ import { DataSource, In, Repository } from "typeorm";
 import { ApiResponse } from "@common/helpers/api-response.helper";
 import { CreateRoleDto } from "@roles/dto/create-role.dto";
 import { Permission } from "@permissions/entities/permission.entity";
+import { PermissionsCacheService } from "@permissions/permissions-cache.service";
 import { Role } from "@roles/entities/role.entity";
 import { RolePermission } from "@roles/entities/role-permission.entity";
 import { UpdateRoleDto } from "@roles/dto/update-role.dto";
@@ -15,6 +16,7 @@ export class RolesService {
     @InjectRepository(Permission) private readonly permRepository: Repository<Permission>,
     @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
     @InjectRepository(RolePermission) private readonly rolePermRepository: Repository<RolePermission>,
+    private permissionsCacheService: PermissionsCacheService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -159,6 +161,8 @@ export class RolesService {
         relations: ["rolePermissions", "rolePermissions.permission"],
       });
 
+      await this.permissionsCacheService.invalidateRolePermissions(id);
+
       return ApiResponse.success<Role>("Rol actualizado", result || undefined);
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -184,6 +188,8 @@ export class RolesService {
 
     const result = await this.roleRepository.remove(roleToRemove);
     if (!result) throw new HttpException("Error al eliminar rol", HttpStatus.BAD_REQUEST);
+
+    await this.permissionsCacheService.invalidateRolePermissions(id);
 
     return ApiResponse.success<Role>("Rol eliminado", result);
   }
