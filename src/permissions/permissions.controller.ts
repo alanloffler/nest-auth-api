@@ -3,12 +3,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@n
 import { CreatePermissionDto } from "@permissions/dto/create-permission.dto";
 import { ERole } from "@common/enums/role.enum";
 import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
+import { PermissionsGuard } from "@auth/guards/permissions.guard";
 import { PermissionsService } from "@permissions/permissions.service";
 import { Roles } from "@auth/decorators/roles.decorator";
 import { RolesGuard } from "@auth/guards/roles.guard";
 import { UpdatePermissionDto } from "@permissions/dto/update-permission.dto";
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, RolesGuard)
 @Controller("permissions")
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
