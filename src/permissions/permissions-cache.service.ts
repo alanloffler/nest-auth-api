@@ -13,6 +13,6 @@ export class PermissionsCacheService {
   }
 
   async invalidateAllRolePermissions(): Promise<void> {
-    await (this.cacheManager as any).reset();
+    await this.cacheManager.clear();
   }
 }
