@@ -1,4 +1,3 @@
-// permissions.guard.ts
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
@@ -6,7 +5,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Reflector } from "@nestjs/core";
 import { Repository } from "typeorm";
 
-import { PERMISSIONS_KEY } from "@auth/decorators/require-permissions.decorator";
+import { PERMISSIONS_KEY } from "@auth/decorators/required-permissions.decorator";
 import { Role } from "@roles/entities/role.entity";
 
 @Injectable()
@@ -41,6 +40,7 @@ export class PermissionsGuard implements CanActivate {
     }
 
     const hasPermissions = requiredPermissions.some((permission) => userPermissions.includes(permission));
+
     if (!hasPermissions) {
       throw new HttpException(`El usuario no posee el permiso necesario: ${requiredPermissions}`, HttpStatus.FORBIDDEN);
     }
@@ -56,7 +56,7 @@ export class PermissionsGuard implements CanActivate {
     if (!permissions) {
       const role = await this.roleRepository.findOne({
         where: { id: roleId },
-        relations: ["rolePermissions", "rolePermissions"],
+        relations: ["rolePermissions", "rolePermissions.permission"],
       });
 
       if (!role || !role.rolePermissions) {
@@ -65,7 +65,7 @@ export class PermissionsGuard implements CanActivate {
 
       permissions = role.rolePermissions.map((rp) => rp.permission.actionKey);
 
-      await this.cacheManager.set(cacheKey, permissions, 0);
+      await this.cacheManager.set(cacheKey, permissions);
     }
 
     return permissions;
