@@ -2,78 +2,77 @@ import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UseGu
 
 import { AdminService } from "@admin/admin.service";
 import { CreateAdminDto } from "@admin/dto/create-admin.dto";
-import { ERole } from "@common/enums/role.enum";
 import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
-import { Roles } from "@auth/decorators/roles.decorator";
-import { RolesGuard } from "@auth/guards/roles.guard";
+import { PermissionsGuard } from "@auth/guards/permissions.guard";
+import { RequiredPermissions } from "@auth/decorators/required-permissions.decorator";
 import { UpdateAdminDto } from "@admin/dto/update-admin.dto";
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller("admin")
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  @Roles([ERole.Superadmin, ERole.Admin])
+  @RequiredPermissions("admin-create")
   @Post()
   create(@Body() admin: CreateAdminDto) {
     return this.adminService.create(admin);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
+  @RequiredPermissions("admin-view")
   @Get()
   findAll() {
     return this.adminService.findAll();
   }
 
-  @Roles([ERole.Superadmin])
+  @RequiredPermissions("admin-view")
   @Get("soft-removed")
   findAllSoftRemoved() {
     return this.adminService.findAllSoftRemoved();
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
+  @RequiredPermissions("admin-view")
   @Get(":id")
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.findOne(id);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin])
+  @RequiredPermissions("admin-view")
   @Get(":id/soft-removed")
   findOneSoftRemoved(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.findOneSoftRemoved(id);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
+  @RequiredPermissions("admin-view")
   @Get(":id/credentials")
   findOneWithCredentials(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.findOneWithCredentials(id);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin, ERole.Teacher])
+  @RequiredPermissions("admin-update")
   @Patch(":id")
   update(@Param("id", ParseUUIDPipe) id: string, @Body() admin: UpdateAdminDto) {
     return this.adminService.update(id, admin);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin])
+  @RequiredPermissions("admin-delete")
   @Delete("soft-remove/:id")
   softRemove(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.softRemove(id);
   }
 
-  @Roles([ERole.Superadmin])
+  @RequiredPermissions("admin-delete-hard")
   @Delete(":id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.remove(id);
   }
 
-  @Roles([ERole.Superadmin])
+  @RequiredPermissions("admin-restore")
   @Patch("restore/:id")
   restore(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.restore(id);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin])
+  @RequiredPermissions("admin-create")
   @Get("/ic-availability/:ic")
   checkIcAvailability(@Param("ic") id: string) {
     return this.adminService.checkIcAvailability(id);
