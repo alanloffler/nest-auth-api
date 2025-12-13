@@ -1,57 +1,60 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseGuards } from "@nestjs/common";
 
 import { CreateRoleDto } from "@roles/dto/create-role.dto";
-import { ERole } from "@common/enums/role.enum";
 import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
-import { Roles } from "@auth/decorators/roles.decorator";
-import { RolesGuard } from "@auth/guards/roles.guard";
+import { PermissionsGuard } from "@auth/guards/permissions.guard";
+import { RequiredPermissions } from "@auth/decorators/required-permissions.decorator";
 import { RolesService } from "@roles/roles.service";
 import { UpdateRoleDto } from "@roles/dto/update-role.dto";
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles([ERole.Superadmin, ERole.Admin])
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller("roles")
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
+  @RequiredPermissions("roles-create")
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
 
+  @RequiredPermissions("roles-view")
   @Get()
   findAll() {
     return this.rolesService.findAll();
   }
 
+  @RequiredPermissions("roles-view")
   @Get("soft-removed")
   findAllSoftRemoved() {
     return this.rolesService.findAllSoftRemoved();
   }
 
+  @RequiredPermissions("roles-view")
   @Get(":id")
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.rolesService.findOne(id);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin])
+  @RequiredPermissions("roles-update")
   @Patch(":id")
   update(@Param("id", ParseUUIDPipe) id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(id, updateRoleDto);
   }
 
+  @RequiredPermissions("roles-delete-hard")
   @Delete(":id")
   remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.rolesService.remove(id);
   }
 
-  @Roles([ERole.Superadmin, ERole.Admin])
+  @RequiredPermissions("roles-delete")
   @Delete("soft-remove/:id")
   softRemove(@Param("id", ParseUUIDPipe) id: string) {
     return this.rolesService.softRemove(id);
   }
 
-  @Roles([ERole.Superadmin])
+  @RequiredPermissions("roles-restore")
   @Patch("restore/:id")
   restore(@Param("id", ParseUUIDPipe) id: string) {
     return this.rolesService.restore(id);
