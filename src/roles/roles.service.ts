@@ -1,6 +1,6 @@
-import { InjectRepository } from "@nestjs/typeorm";
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { DataSource, In, Repository } from "typeorm";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 
 import { ApiResponse } from "@common/helpers/api-response.helper";
 import { CreateRoleDto } from "@roles/dto/create-role.dto";
@@ -113,7 +113,6 @@ export class RolesService {
 
   async update(id: string, updateRoleDto: UpdateRoleDto): Promise<ApiResponse<Role>> {
     const roleToUpdate = await this.findRoleById(id);
-
     const { value, permissions } = updateRoleDto;
     if (value && value !== roleToUpdate.value && (await this.roleAlreadyExists(value))) {
       throw new HttpException("El rol ya existe. No puedes repetirlo", HttpStatus.BAD_REQUEST);
@@ -200,6 +199,8 @@ export class RolesService {
     const result = await this.roleRepository.softRemove(roleToRemove);
     if (!result) throw new HttpException("Error al eliminar rol", HttpStatus.BAD_REQUEST);
 
+    await this.permissionsCacheService.invalidateRolePermissions(id);
+
     return ApiResponse.removed<Role>("Rol eliminado", result);
   }
 
@@ -219,7 +220,6 @@ export class RolesService {
     return ApiResponse.success<Role>("Rol restaurado", restoredAdmin);
   }
 
-  // Private methods
   private async roleExists(value: string): Promise<void> {
     const role = await this.roleRepository.findOne({ where: { value } });
     if (role) throw new HttpException("El rol ya existe. No puedes repetirlo", HttpStatus.BAD_REQUEST);
