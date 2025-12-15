@@ -43,14 +43,14 @@ export class PermissionsService {
   }
 
   async findAll(): Promise<ApiResponse<Permission[]>> {
-    const permissions = await this.permissionRepository.find();
+    const permissions = await this.permissionRepository.find({ withDeleted: true });
     if (!permissions) throw new HttpException("Permisos no encontrados", HttpStatus.NOT_FOUND);
 
     return ApiResponse.success<Permission[]>("Permisos encontrados", permissions);
   }
 
   async findAllGrouped(): Promise<ApiResponse<GroupedPermission[]>> {
-    const permissions = await this.permissionRepository.find();
+    const permissions = await this.permissionRepository.find({ withDeleted: true });
     if (!permissions) throw new HttpException("Permisos no encontrados", HttpStatus.NOT_FOUND);
 
     const grouped = permissions.reduce(
@@ -73,6 +73,7 @@ export class PermissionsService {
         name: p.name,
         key: p.actionKey,
         value: false,
+        deletedAt: p.deletedAt,
       })),
     }));
 
@@ -111,13 +112,46 @@ export class PermissionsService {
     return ApiResponse.success<Permission>("Permiso actualizado", updatedPermission);
   }
 
+  async softRemove(id: string): Promise<ApiResponse<Permission>> {
+    const permissionToRemove = await this.findOneById(id);
+
+    const result = await this.permissionRepository.softRemove(permissionToRemove);
+    if (!result) throw new HttpException("Error al eliminar permiso", HttpStatus.BAD_REQUEST);
+
+    return ApiResponse.removed<Permission>("Permiso eliminado", result);
+  }
+
   async remove(id: string): Promise<ApiResponse<Permission>> {
-    const permissionToRemove = await this.permissionRepository.findOneBy({ id });
-    if (!permissionToRemove) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
+    const permissionToRemove = await this.findOneById(id);
 
     const result = await this.permissionRepository.remove(permissionToRemove);
     if (!result) throw new HttpException("Error al eliminar permiso", HttpStatus.BAD_REQUEST);
 
     return ApiResponse.removed<Permission>("Permiso eliminado", result);
+  }
+
+  async restore(id: string): Promise<ApiResponse<Permission>> {
+    const permissionToRestore = await this.permissionRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    if (!permissionToRestore) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
+
+    const result = await this.permissionRepository.restore(permissionToRestore.id);
+    if (!result) throw new HttpException("Error al restaurar permiso", HttpStatus.BAD_REQUEST);
+
+    const restoredAdmin = await this.permissionRepository.findOne({
+      where: { id },
+    });
+    if (!restoredAdmin) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Permission>("Permiso restaurado", restoredAdmin);
+  }
+
+  private async findOneById(id: string): Promise<Permission> {
+    const permission = await this.permissionRepository.findOne({ where: { id } });
+    if (!permission) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
+
+    return permission;
   }
 }
