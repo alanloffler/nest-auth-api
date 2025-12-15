@@ -63,7 +63,7 @@ export class PermissionsGuard implements CanActivate {
         return [];
       }
 
-      permissions = role.rolePermissions.map((rp) => rp.permission.actionKey);
+      permissions = role.rolePermissions.filter((rp) => rp.permission !== null).map((rp) => rp.permission?.actionKey);
 
       await this.cacheManager.set(cacheKey, permissions);
     }
