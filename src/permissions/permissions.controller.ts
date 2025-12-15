@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, ParseUUIDPipe, Delete } from "@nestjs/common";
 
 import { CreatePermissionDto } from "@permissions/dto/create-permission.dto";
 import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
@@ -33,18 +33,31 @@ export class PermissionsController {
 
   @RequiredPermissions("permissions-view")
   @Get(":id")
-  findOne(@Param("id") id: string) {
+  findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.permissionsService.findOne(id);
   }
 
   @RequiredPermissions("permissions-update")
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
+  update(@Param("id", ParseUUIDPipe) id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
     return this.permissionsService.update(id, updatePermissionDto);
   }
 
   @RequiredPermissions("permissions-delete")
-  remove(@Param("id") id: string) {
+  @Delete("soft-remove/:id")
+  softRemove(@Param("id", ParseUUIDPipe) id: string) {
+    return this.permissionsService.softRemove(id);
+  }
+
+  @RequiredPermissions("permissions-delete-hard")
+  @Delete(":id")
+  remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.permissionsService.remove(id);
+  }
+
+  @RequiredPermissions("permissions-restore")
+  @Patch("restore/:id")
+  restore(@Param("id", ParseUUIDPipe) id: string) {
+    return this.permissionsService.restore(id);
   }
 }
