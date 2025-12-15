@@ -1,4 +1,4 @@
-import { DataSource, In, Repository } from "typeorm";
+import { DataSource, In, IsNull, Repository } from "typeorm";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 
@@ -140,7 +140,7 @@ export class RolesService {
 
       if (uniquePermissionIds.length > 0) {
         const permissions = await this.permRepository.find({
-          where: { id: In(uniquePermissionIds) },
+          where: { id: In(uniquePermissionIds), deletedAt: IsNull() },
         });
 
         const rolePermsToInsert = permissions.map((perm) => {
