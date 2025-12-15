@@ -1,3 +1,4 @@
+import * as bcrypt from "bcrypt";
 import type { Response } from "express";
 import { ConfigService } from "@nestjs/config";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
@@ -52,7 +53,9 @@ export class AuthService {
     const user = await this.adminService.findOneByEmail(email);
 
     if (!user) throw new HttpException("Usuario incorrecto", HttpStatus.BAD_REQUEST);
-    if (user.password !== password) throw new HttpException("Contraseña incorrecta", HttpStatus.UNAUTHORIZED);
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) throw new HttpException("Contraseña incorrecta", HttpStatus.UNAUTHORIZED);
 
     return true;
   }
