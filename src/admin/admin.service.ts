@@ -1,3 +1,5 @@
+import * as bcrypt from "bcrypt";
+import { ConfigService } from "@nestjs/config";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -9,13 +11,23 @@ import { UpdateAdminDto } from "@admin/dto/update-admin.dto";
 
 @Injectable()
 export class AdminService {
-  constructor(@InjectRepository(Admin) private adminRepository: Repository<Admin>) {}
+  constructor(
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
+    private readonly configService: ConfigService,
+  ) {}
 
   async create(createAdminDto: CreateAdminDto): Promise<ApiResponse<Admin>> {
     const checkIc = await this.checkIcAvailability(createAdminDto.ic);
     if (checkIc.data === false) throw new HttpException("DNI ya registrado", HttpStatus.BAD_REQUEST);
 
-    const createAdmin = this.adminRepository.create(createAdminDto);
+    const saltRounds = parseInt(this.configService.get("BCRYPT_SALT_ROUNDS") || "10");
+    const hashedPassword = await bcrypt.hash(createAdminDto.password, saltRounds);
+
+    const createAdmin = this.adminRepository.create({
+      ...createAdminDto,
+      password: hashedPassword,
+    });
+
     const saveAdmin = await this.adminRepository.save(createAdmin);
     if (!saveAdmin) throw new HttpException("Error al crear admin", HttpStatus.BAD_REQUEST);
 
@@ -145,6 +157,11 @@ export class AdminService {
   }
 
   async update(id: string, updateAdminDto: UpdateAdminDto): Promise<ApiResponse<Admin>> {
+    if (updateAdminDto.password) {
+      const saltRounds = parseInt(this.configService.get("BCRYPT_SALT_ROUNDS") || "10");
+      updateAdminDto.password = await bcrypt.hash(updateAdminDto.password, saltRounds);
+    }
+
     const result = await this.adminRepository.update(id, updateAdminDto);
     if (!result) throw new HttpException("Error al actualizar admin", HttpStatus.BAD_REQUEST);
 
