@@ -46,6 +46,7 @@ JWT_SECRET=token_secret
 JWT_EXPIRES_IN=1m
 JWT_REFRESH_SECRET=refreshtoken_secret
 JWT_REFRESH_EXPIRES_IN=2m
+BCRYPT_SALT_ROUNDS=12
 ```
 
 Expires times are in minutes for testing purposes. Modify JWT_EXPIRES_IN and JWT_REFRESH_EXPIRES_IN to fit your needs.
@@ -55,7 +56,7 @@ Expires times are in minutes for testing purposes. Modify JWT_EXPIRES_IN and JWT
 JWT_EXPIRES_IN=15m  
 JWT_REFRESH_EXPIRES_IN=5d
 
-**Role permission:** use *JwtAuthGuard* and *RolesGuard* to access the endpoints (implemented in admin and roles controllers).
+**Role permission:** use _JwtAuthGuard_ and _RolesGuard_ to access the endpoints (implemented in admin and roles controllers).
 
 ## Stay in touch
 
