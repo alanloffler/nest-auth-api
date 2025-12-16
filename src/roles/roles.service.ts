@@ -111,6 +111,26 @@ export class RolesService {
     return ApiResponse.success<Role>("Rol encontrado", role);
   }
 
+  async findOneSoftRemoved(id: string): Promise<ApiResponse<Role>> {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ["admins"],
+      select: {
+        id: true,
+        name: true,
+        value: true,
+        description: true,
+        createdAt: true,
+        deletedAt: true,
+        admins: { id: true, firstName: true, lastName: true, userName: true },
+      },
+      withDeleted: true,
+    });
+    if (!role) throw new HttpException("Rol no encontrado", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Role>("Rol encontrado", role);
+  }
+
   async update(id: string, updateRoleDto: UpdateRoleDto): Promise<ApiResponse<Role>> {
     const roleToUpdate = await this.findRoleById(id);
     const { value, permissions } = updateRoleDto;
