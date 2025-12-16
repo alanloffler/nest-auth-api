@@ -36,6 +36,12 @@ export class RolesController {
     return this.rolesService.findOne(id);
   }
 
+  @RequiredPermissions("roles-view")
+  @Get(":id/soft-removed")
+  findOneSoftRemoved(@Param("id", ParseUUIDPipe) id: string) {
+    return this.rolesService.findOneSoftRemoved(id);
+  }
+
   @RequiredPermissions("roles-update")
   @Patch(":id")
   update(@Param("id", ParseUUIDPipe) id: string, @Body() updateRoleDto: UpdateRoleDto) {
