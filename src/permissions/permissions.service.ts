@@ -90,7 +90,7 @@ export class PermissionsService {
   }
 
   async findOne(id: string): Promise<ApiResponse<Permission>> {
-    const permission = await this.permissionRepository.findOneBy({ id });
+    const permission = await this.permissionRepository.findOne({ where: { id }, withDeleted: true });
     if (!permission) throw new HttpException("Permiso no encontrado", HttpStatus.NOT_FOUND);
 
     return ApiResponse.success<Permission>("Permiso encontrado", permission);
