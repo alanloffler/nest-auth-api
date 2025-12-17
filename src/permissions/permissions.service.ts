@@ -24,17 +24,12 @@ export class PermissionsService {
   constructor(@InjectRepository(Permission) private readonly permissionRepository: Repository<Permission>) {}
 
   async create(createPermissionDto: CreatePermissionDto) {
-    const permissionDto = {
-      ...createPermissionDto,
-      actionKey: `${createPermissionDto.category}-${createPermissionDto.actionKey}`,
-    };
-
     const checkExists = await this.permissionRepository.findOne({
-      where: { actionKey: permissionDto.actionKey },
+      where: { actionKey: createPermissionDto.actionKey },
     });
     if (checkExists) throw new HttpException("Permiso ya registrado", HttpStatus.BAD_REQUEST);
 
-    const permission = this.permissionRepository.create(permissionDto);
+    const permission = this.permissionRepository.create(createPermissionDto);
     const savePermission = await this.permissionRepository.save(permission);
 
     if (!savePermission) throw new HttpException("Error al crear permiso", HttpStatus.BAD_REQUEST);
@@ -83,6 +78,7 @@ export class PermissionsService {
   private getCategoryName(category: string): string {
     const categoryNames: Record<string, string> = {
       admin: "Administradores",
+      permissions: "Permisos",
       roles: "Roles",
     };
 
@@ -97,12 +93,7 @@ export class PermissionsService {
   }
 
   async update(id: string, updatePermissionDto: UpdatePermissionDto): Promise<ApiResponse<Permission>> {
-    const permissionDto = {
-      ...updatePermissionDto,
-      actionKey: `${updatePermissionDto.category}-${updatePermissionDto.actionKey}`,
-    };
-
-    const result = await this.permissionRepository.update(id, permissionDto);
+    const result = await this.permissionRepository.update(id, updatePermissionDto);
 
     if (!result) throw new HttpException("Error al actualizar permiso", HttpStatus.BAD_REQUEST);
 
