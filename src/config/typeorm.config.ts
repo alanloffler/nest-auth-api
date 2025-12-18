@@ -13,11 +13,12 @@ export const typeOrmConfig: DataSourceOptions = {
   username: configService.get("DB_USERNAME"),
   password: configService.get("DB_PASSWORD"),
   database: configService.get("DB_DATABASE"),
+  url: configService.get("DB_URL"),
   // entities: ["src/**/*.entity.ts"],
   // migrations: ["src/migrations/*.ts"],
   entities: ["dist/**/*.entity.ts"],
   migrations: ["dist/migrations/*.ts"],
-  synchronize: false,
+  synchronize: true,
 };
 
 export const AppDataSource = new DataSource(typeOrmConfig);
