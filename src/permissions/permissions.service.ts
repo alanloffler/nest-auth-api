@@ -63,13 +63,15 @@ export class PermissionsService {
       id: crypto.randomUUID(),
       name: this.getCategoryName(category),
       module: category,
-      actions: perms.map((p) => ({
-        id: p.id,
-        name: p.name,
-        key: p.actionKey,
-        value: false,
-        deletedAt: p.deletedAt,
-      })),
+      actions: perms
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          key: p.actionKey,
+          value: false,
+          deletedAt: p.deletedAt,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
     }));
 
     return ApiResponse.success<GroupedPermission[]>("Permisos encontrados", data);
