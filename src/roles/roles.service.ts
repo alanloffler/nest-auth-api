@@ -103,6 +103,7 @@ export class RolesService {
         value: true,
         description: true,
         createdAt: true,
+        deletedAt: true,
         admins: { id: true, firstName: true, lastName: true, userName: true },
       },
     });
