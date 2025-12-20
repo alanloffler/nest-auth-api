@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Request, UseGuards } from "@nestjs/common";
 
+import type { IRequest } from "@auth/interfaces/request.interface";
 import { AdminService } from "@admin/admin.service";
 import { CreateAdminDto } from "@admin/dto/create-admin.dto";
 import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
@@ -28,6 +29,14 @@ export class AdminController {
   @Get("soft-removed")
   findAllSoftRemoved() {
     return this.adminService.findAllSoftRemoved();
+  }
+
+  // Without permissions, admin can see their own profile
+  @Get("/me")
+  findMe(@Request() req: IRequest) {
+    const adminId = req.user.id;
+    console.log(adminId);
+    return this.adminService.findOne(adminId);
   }
 
   @RequiredPermissions("admin-view")
