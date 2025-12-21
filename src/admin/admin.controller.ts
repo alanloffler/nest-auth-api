@@ -32,10 +32,9 @@ export class AdminController {
   }
 
   // Without permissions, admin can see their own profile
-  @Get("/me")
+  @Get("/profile")
   findMe(@Request() req: IRequest) {
     const adminId = req.user.id;
-    console.log(adminId);
     return this.adminService.findOne(adminId);
   }
 
@@ -55,6 +54,13 @@ export class AdminController {
   @Get(":id/credentials")
   findOneWithCredentials(@Param("id", ParseUUIDPipe) id: string) {
     return this.adminService.findOneWithCredentials(id);
+  }
+
+  // Without permissions, admin can update their own profile
+  @Patch("/profile")
+  updateProfile(@Request() req: IRequest, @Body() admin: UpdateAdminDto) {
+    const adminId = req.user.id;
+    return this.adminService.update(adminId, admin);
   }
 
   @RequiredPermissions("admin-update")
