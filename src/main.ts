@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ["http://localhost:3000", "http://localhost:5173", "https://react-auth-reactive.vercel.app/"],
+    origin: ["http://localhost:3000", "http://localhost:5173", "https://react-auth-reactive.vercel.app"],
     credentials: true,
   });
   app.use(cookieParser());
