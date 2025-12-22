@@ -225,6 +225,11 @@ export class AdminService {
     return ApiResponse.success<boolean>("Disponibilidad de DNI", admin ? false : true);
   }
 
+  public async checkUsernameAvailability(userName: string): Promise<ApiResponse<boolean>> {
+    const username = await this.adminRepository.findOne({ where: { userName } });
+    return ApiResponse.success<boolean>("Disponibilidad de nombre de usuario", username ? false : true);
+  }
+
   private async findOneById(id: string): Promise<Admin> {
     const admin = await this.adminRepository.findOne({ where: { id } });
     if (!admin) throw new HttpException("Admin no encontrado", HttpStatus.NOT_FOUND);
