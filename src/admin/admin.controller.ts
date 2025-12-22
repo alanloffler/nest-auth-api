@@ -87,9 +87,15 @@ export class AdminController {
     return this.adminService.restore(id);
   }
 
-  @RequiredPermissions("admin-create")
+  // TODO: manage multi permissions (here: admin-create, admin-update)
   @Get("/ic-availability/:ic")
   checkIcAvailability(@Param("ic") id: string) {
     return this.adminService.checkIcAvailability(id);
+  }
+
+  // TODO: manage multi permissions (here: admin-create, admin-update)
+  @Get("/username-availability/:userName")
+  checkUsernameAvailability(@Param("userName") userName: string) {
+    return this.adminService.checkUsernameAvailability(userName);
   }
 }
