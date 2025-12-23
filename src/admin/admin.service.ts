@@ -160,9 +160,22 @@ export class AdminService {
   }
 
   async update(id: string, updateAdminDto: UpdateAdminDto): Promise<ApiResponse<Admin>> {
-    if (updateAdminDto.email) {
-      const checkEmail = await this.checkEmailAvailability(updateAdminDto.email);
-      if (checkEmail.data === false) throw new HttpException("Email ya registrado", HttpStatus.BAD_REQUEST);
+    const user = await this.findOneById(id);
+
+    if (updateAdminDto.ic && updateAdminDto.ic !== user.ic) {
+      const icAvailable = await this.checkIcAvailability(updateAdminDto.ic);
+      if (icAvailable.data === false) throw new HttpException("DNI ya registrado", HttpStatus.BAD_REQUEST);
+    }
+
+    if (updateAdminDto.userName && updateAdminDto.userName !== user.userName) {
+      const userNameAvailable = await this.checkUsernameAvailability(updateAdminDto.userName);
+      if (userNameAvailable.data === false)
+        throw new HttpException("Nombre de usuario ya registrado", HttpStatus.BAD_REQUEST);
+    }
+
+    if (updateAdminDto.email && updateAdminDto.email !== user.email) {
+      const emailAvailable = await this.checkEmailAvailability(updateAdminDto.email);
+      if (emailAvailable.data === false) throw new HttpException("Email ya registrado", HttpStatus.BAD_REQUEST);
     }
 
     if (updateAdminDto.password) {
@@ -234,7 +247,7 @@ export class AdminService {
   }
 
   public async checkIcAvailability(ic: string): Promise<ApiResponse<boolean>> {
-    const admin = await this.adminRepository.findOne({ where: { ic: ic } });
+    const admin = await this.adminRepository.findOne({ where: { ic } });
     return ApiResponse.success<boolean>("Disponibilidad de DNI", admin ? false : true);
   }
 
