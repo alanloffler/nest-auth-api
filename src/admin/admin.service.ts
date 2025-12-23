@@ -20,6 +20,9 @@ export class AdminService {
     const checkIc = await this.checkIcAvailability(createAdminDto.ic);
     if (checkIc.data === false) throw new HttpException("DNI ya registrado", HttpStatus.BAD_REQUEST);
 
+    const checkEmail = await this.checkEmailAvailability(createAdminDto.email);
+    if (checkEmail.data === false) throw new HttpException("Email ya registrado", HttpStatus.BAD_REQUEST);
+
     const saltRounds = parseInt(this.configService.get("BCRYPT_SALT_ROUNDS") || "10");
     const hashedPassword = await bcrypt.hash(createAdminDto.password, saltRounds);
 
@@ -157,6 +160,11 @@ export class AdminService {
   }
 
   async update(id: string, updateAdminDto: UpdateAdminDto): Promise<ApiResponse<Admin>> {
+    if (updateAdminDto.email) {
+      const checkEmail = await this.checkEmailAvailability(updateAdminDto.email);
+      if (checkEmail.data === false) throw new HttpException("Email ya registrado", HttpStatus.BAD_REQUEST);
+    }
+
     if (updateAdminDto.password) {
       const saltRounds = parseInt(this.configService.get("BCRYPT_SALT_ROUNDS") || "10");
       updateAdminDto.password = await bcrypt.hash(updateAdminDto.password, saltRounds);
@@ -218,6 +226,11 @@ export class AdminService {
     });
 
     return admin;
+  }
+
+  public async checkEmailAvailability(email: string): Promise<ApiResponse<boolean>> {
+    const admin = await this.adminRepository.findOne({ where: { email } });
+    return ApiResponse.success<boolean>("Disponibilidad de email", admin ? false : true);
   }
 
   public async checkIcAvailability(ic: string): Promise<ApiResponse<boolean>> {
