@@ -28,7 +28,7 @@ export class Admin {
   @Column({ type: "varchar", length: 100, name: "last_name", nullable: false })
   lastName: string;
 
-  @Column({ type: "varchar", length: 100, nullable: false })
+  @Column({ type: "varchar", length: 100, nullable: false, unique: true })
   email: string;
 
   @Column({ type: "varchar", length: 100, nullable: false })
