@@ -88,6 +88,12 @@ export class AdminController {
   }
 
   // TODO: manage multi permissions (here: admin-create, admin-update)
+  @Get("/email-availability/:email")
+  checkEmailAvailability(@Param("email") email: string) {
+    return this.adminService.checkEmailAvailability(email);
+  }
+
+  // TODO: manage multi permissions (here: admin-create, admin-update)
   @Get("/ic-availability/:ic")
   checkIcAvailability(@Param("ic") id: string) {
     return this.adminService.checkIcAvailability(id);
