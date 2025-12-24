@@ -77,6 +77,13 @@ export class PermissionsService {
     return ApiResponse.success<GroupedPermission[]>("Permisos encontrados", data);
   }
 
+  async findAllByCategory(category: string): Promise<ApiResponse<Permission[]>> {
+    const permissions = await this.permissionRepository.find({ where: { category } });
+    if (!permissions) throw new HttpException("Permisos no encontrados", HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Permission[]>("Permisos encontrados", permissions);
+  }
+
   private getCategoryName(category: string): string {
     const categoryNames: Record<string, string> = {
       admin: "Administradores",
