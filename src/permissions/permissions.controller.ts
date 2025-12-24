@@ -31,6 +31,14 @@ export class PermissionsController {
     return this.permissionsService.findAllGrouped();
   }
 
+  @RequiredPermissions("permissions-create")
+  @RequiredPermissions("permissions-update")
+  @RequiredPermissions("permissions-view")
+  @Get("category/:category")
+  findAllByCategory(@Param("category") category: string) {
+    return this.permissionsService.findAllByCategory(category);
+  }
+
   @RequiredPermissions("permissions-view")
   @Get(":id")
   findOne(@Param("id", ParseUUIDPipe) id: string) {
