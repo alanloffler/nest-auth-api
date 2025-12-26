@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common";
 
 import { CreateSettingDto } from "@settings/dto/create-setting.dto";
+import { EModule } from "@common/enums/module.enum";
 import { JwtAuthGuard } from "@auth/guards/jwt-auth.guard";
+import { ParseModulePipe } from "@common/pipes/parse-module.pipe";
 import { PermissionsGuard } from "@auth/guards/permissions.guard";
 import { RequiredPermissions } from "@auth/decorators/required-permissions.decorator";
 import { SettingsService } from "@settings/settings.service";
@@ -22,6 +24,12 @@ export class SettingsController {
   @Get()
   findAll() {
     return this.settingsService.findAll();
+  }
+
+  @RequiredPermissions("settings-view")
+  @Get("by-module/:module")
+  findByModule(@Param("module", ParseModulePipe) module: string) {
+    return this.settingsService.findByModule(module as EModule);
   }
 
   @RequiredPermissions("settings-view")
