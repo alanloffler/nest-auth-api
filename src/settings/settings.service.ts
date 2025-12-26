@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 
 import { ApiResponse } from "@common/helpers/api-response.helper";
 import { CreateSettingDto } from "@settings/dto/create-setting.dto";
+import { EModule } from "@common/enums/module.enum";
 import { Setting } from "@settings/entities/setting.entity";
 import { UpdateSettingDto } from "@settings/dto/update-setting.dto";
 
@@ -27,6 +28,13 @@ export class SettingsService {
     if (!settings) throw new HttpException("Configuraciones no encontradas", HttpStatus.NOT_FOUND);
 
     return ApiResponse.success<Setting[]>("Configuraciones encontradas", settings);
+  }
+
+  async findByModule(module: EModule) {
+    const settings = await this.settingRepository.find({ where: { module } });
+    if (!settings) throw new HttpException(`Configuraciones de ${module} no encontradas`, HttpStatus.NOT_FOUND);
+
+    return ApiResponse.success<Setting[]>(`Configuraciones de ${module} encontradas`, settings);
   }
 
   async findOne(id: string) {
