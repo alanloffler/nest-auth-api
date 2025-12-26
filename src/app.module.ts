@@ -7,6 +7,7 @@ import { AuthModule } from "@auth/auth.module";
 import { CacheConfigModule } from "@config/cache-config.module";
 import { PermissionsModule } from "@permissions/permissions.module";
 import { RolesModule } from "@roles/roles.module";
+import { SettingsModule } from "@settings/settings.module";
 import { typeOrmConfig } from "@config/typeorm.config";
 
 @Module({
@@ -24,6 +25,7 @@ import { typeOrmConfig } from "@config/typeorm.config";
     AuthModule,
     PermissionsModule,
     RolesModule,
+    SettingsModule,
   ],
   controllers: [],
   providers: [],
