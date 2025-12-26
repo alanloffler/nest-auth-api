@@ -1,12 +1,14 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
+import { EModule } from "@common/enums/module.enum";
+
 @Entity()
 export class Setting {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: "varchar", length: 100, nullable: false })
-  module: "app" | "dashboard";
+  @Column({ type: "enum", enum: EModule, nullable: false })
+  module: EModule;
 
   @Column({ type: "varchar", length: 100, nullable: false })
   key: string;
