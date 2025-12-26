@@ -27,7 +27,8 @@
       "@common/*": ["./src/common/*"],
       "@config/*": ["./src/config/*"],
       "@permissions/*": ["./src/permissions/*"],
-      "@roles/*": ["./src/roles/*"]
+      "@roles/*": ["./src/roles/*"],
+      "@settings/*": ["./src/settings/*"]
     }
   }
 }
