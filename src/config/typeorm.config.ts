@@ -14,10 +14,6 @@ export const typeOrmConfig: DataSourceOptions = {
   password: configService.get("DB_PASSWORD"),
   database: configService.get("DB_DATABASE"),
   url: configService.get("DB_URL"),
-  // entities: ["src/**/*.entity.ts"],
-  // migrations: ["src/migrations/*.ts"],
-  entities: ["dist/**/*.entity.ts"],
-  migrations: ["dist/migrations/*.ts"],
   synchronize: true,
 };
 
