@@ -16,6 +16,9 @@ export class Setting {
   @Column({ type: "varchar", length: 100, nullable: false })
   value: string;
 
+  @Column({ type: "varchar", length: 100, nullable: false })
+  title: string;
+
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
