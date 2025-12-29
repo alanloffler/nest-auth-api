@@ -1,6 +1,7 @@
-import { IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 import { EModule } from "@common/enums/module.enum";
+import { ESubmodule } from "@/common/enums/submodule.enum";
 
 export class CreateSettingDto {
   @MinLength(3, { message: "La llave debe tener al menos 3 caracteres" })
@@ -13,6 +14,12 @@ export class CreateSettingDto {
   })
   @IsNotEmpty({ message: "El módulo es obligatorio" })
   module: EModule;
+
+  @IsEnum(EModule, {
+    message: `El submódulo debe ser uno de los siguientes: ${Object.values(ESubmodule).join(", ")}`,
+  })
+  @IsOptional()
+  submodule?: ESubmodule;
 
   @MinLength(3, { message: "El título debe tener al menos 3 caracteres" })
   @IsString({ message: "El título debe ser una cadena de texto" })
