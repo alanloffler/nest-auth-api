@@ -135,43 +135,39 @@ export class AuthService {
   }
 
   private setTokenCookie(res: Response, tokens: IToken): void {
-    res.cookie("accessToken", tokens.accessToken, {
+    const isProduction = this.configService.get("NODE_ENV") === "production";
+
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: this.getMiliseconds(this.configService.get("JWT_EXPIRES_IN")),
       path: "/",
-      partitioned: true,
+      sameSite: isProduction ? ("none" as const) : ("lax" as const),
+      secure: isProduction,
+    };
+
+    res.cookie("accessToken", tokens.accessToken, {
+      ...cookieOptions,
+      maxAge: this.getMiliseconds(this.configService.get("JWT_EXPIRES_IN")),
     });
 
     res.cookie("refreshToken", tokens.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      ...cookieOptions,
       maxAge: this.getMiliseconds(this.configService.get("JWT_REFRESH_EXPIRES_IN")),
-      path: "/",
-      partitioned: true,
     });
   }
 
   private clearTokenCookie(res: Response): void {
-    res.cookie("accessToken", "", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 0,
-      path: "/",
-      partitioned: true,
-    });
+    const isProduction = this.configService.get("NODE_ENV") === "production";
 
-    res.cookie("refreshToken", "", {
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
       maxAge: 0,
       path: "/",
-      partitioned: true,
-    });
+      sameSite: isProduction ? ("none" as const) : ("lax" as const),
+      secure: isProduction,
+    };
+
+    res.cookie("accessToken", "", cookieOptions);
+    res.cookie("refreshToken", "", cookieOptions);
   }
 
   private getMiliseconds(time: string | undefined): number {
