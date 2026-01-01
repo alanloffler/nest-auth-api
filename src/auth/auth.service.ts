@@ -141,6 +141,7 @@ export class AuthService {
       sameSite: "none",
       maxAge: this.getMiliseconds(this.configService.get("JWT_EXPIRES_IN")),
       path: "/",
+      partitioned: true,
     });
 
     res.cookie("refreshToken", tokens.refreshToken, {
@@ -149,6 +150,7 @@ export class AuthService {
       sameSite: "none",
       maxAge: this.getMiliseconds(this.configService.get("JWT_REFRESH_EXPIRES_IN")),
       path: "/",
+      partitioned: true,
     });
   }
 
@@ -159,6 +161,7 @@ export class AuthService {
       sameSite: "none",
       maxAge: 0,
       path: "/",
+      partitioned: true,
     });
 
     res.cookie("refreshToken", "", {
@@ -167,6 +170,7 @@ export class AuthService {
       sameSite: "none",
       maxAge: 0,
       path: "/",
+      partitioned: true,
     });
   }
 
