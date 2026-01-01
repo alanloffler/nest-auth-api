@@ -10,8 +10,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ["http://localhost:3000", "http://localhost:5173", "https://react-auth-reactive.vercel.app"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
     credentials: true,
+    exposedHeaders: ["Set-Cookie"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    origin: ["http://localhost:3000", "http://localhost:5173", "https://react-auth-reactive.vercel.app"],
   });
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
