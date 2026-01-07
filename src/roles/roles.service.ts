@@ -151,7 +151,7 @@ export class RolesService {
 
     try {
       const updateRole = await queryRunner.manager.save(Role, {
-        ...roleToUpdate,
+        id: roleToUpdate.id,
         name: updateRoleDto.name,
         value: updateRoleDto.value,
         description: updateRoleDto.description,
